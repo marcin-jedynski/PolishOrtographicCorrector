@@ -1,0 +1,28 @@
+#fst accepting letters of polish alphabet
+
+PL_letters = Optimize["a" | "ą" | "b" | "c" | "ć" | "d" | "e" | "ę" | "f" | "g" | "h" | "i" | "j" | "k" | "l" | "ł" | "m" | "n" | "o" | "p" | "r" | "s" | "ś" | "t" | "u" | "w" | "ó" | "z" | "ź" | "ż" | "y" |"A" | "Ą" | "B" | "C" | "Ć" | "D" | "E" | "Ę" | "F" | "G" | "H" | "I" | "J" | "K" | "L" | "Ł" | "M" | "N" | "O" | "P" | "R" | "S" | "Ś" | "T" | "U" | "W" | "Ó" | "Z" | "Ź" | "Ż" | "Y" ] ;
+
+#fst rewriting common orthographic errors
+
+PL_errors = Optimize[(("ć":"c") | ("c":"ć") | ("ż":"z") | ("z":"ż") | ("ź":"z") | ("z":"ź") | ("o":"u") |  ("ó":"o") | ("o":"ó") | ("l":"ł") | ("ł":"l") | ("e":"ę") | ("ę":"e") | ("om":"ą") | ("ą":"om") | ("a":"ą") | ("ą":"a") | ("h":"ch") | ("ch":"h") | ("u":"ó") | ("ó":"u") | ("ż":"rz") | ("rz":"ż")| ("s":"ś") | ("ś":"s") )<1>];
+
+#fsts rewriting from lowercase to uppercase and vice versa
+
+PL_toUpperCase = Optimize[(("a":"A") | ("b":"B") | ("c":"C") | ("d":"D") | ("e":"E") | ("f":"F") | ("g":"G") | ("h":"H") | ("i":"I") | ("j":"J") | ("k":"K") | ("l":"L") | ("m":"M") | ("n":"N") | ("o":"O") | ("p":"P") | ("r":"R") | ("s":"S") | ("t":"T") | ("u":"U") | ("w":"W") | ("z":"Z") | ("y":"Y") | ("ą":"Ą") | ("ę":"Ę") | ("ć":"Ć") | ("ł":"Ł") | ("ó":"Ó") | ("ś":"Ś") | ("ż":"Ż") | ("ź":"Ź") )<1>];
+PL_toLowerCase = Optimize[(("A":"a") | ("B":"b" | ("CH":"ch")) | ("C":"c") | ("D":"d") | ("E":"e") | ("F":"f") | ("G":"g") | ("H":"h") | ("I":"i") | ("J":"j") | ("K":"k") | ("L":"l") | ("M":"m") | ("N":"n") | ("O":"o") | ("OM":"om") | ("P":"p" | ("RZ":"rz")) | ("R":"r") | ("S":"s") | ("T":"t") | ("U":"u") | ("W":"w") | ("Z":"z") | ("Y":"y") | ("Ą":"ą") | ("Ę":"ę") | ("Ć":"ć") | ("Ł":"ł") | ("Ó":"ó") | ("Ś":"ś") | ("Ż":"ż") | ("Ź":"ź") )<1>];
+#PL_errorsUpperCase = Optimize [PL_toLowerCase @ PL_errors];
+#fsts accepting polish words taken from PoliMorf dictionary
+
+d1 = Optimize[StringFile['./polimorf/1M/xaa']];
+d2 = Optimize[StringFile['./polimorf/1M/xab']];
+d3 = Optimize[StringFile['./polimorf/1M/xac']];
+d4 = Optimize[StringFile['./polimorf/1M/xad']];
+d12 =  Optimize[ d1 | d2 ];
+d123 = Optimize [ d12 | d3 ];
+d1234 = Optimize [ d123 |d4 ];
+
+#errormaker = Optimize[d1234 @ ((PL_letters|PL_errors|PL_toUpperCase|PL_toLowerCase)+)];
+#errormaker = Optimize[d1234 @ ((PL_letters|PL_errors|PL_errorsUpperCase|PL_toUpperCase|PL_toLowerCase)+)];
+errormaker = Optimize[d1234 @ ((PL_letters|PL_errors|PL_toUpperCase|PL_toLowerCase)+)];
+
+export corrector  = Optimize[Invert[errormaker]];
